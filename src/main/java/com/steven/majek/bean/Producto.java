@@ -1,9 +1,6 @@
 package com.steven.majek.bean;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.steven.majek.bean.resultBean.AllProducts;
@@ -15,6 +12,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -25,7 +23,7 @@ import java.util.Set;
 public class Producto {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(nullable = false,length = 30)
@@ -50,24 +48,25 @@ public class Producto {
     private String imagen;
 
     @ManyToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
-    @JoinColumn()
-    @JsonBackReference
+    @JsonBackReference(value = "activo_product")
+    //@JsonManagedReference(value = "activo_product")
     private ActivoVendido activoVendido; //active, sold, redraw, reserved
 
     @ManyToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
-    @JoinColumn()
-    @JsonBackReference
+    @JsonBackReference(value = "estado_product")
+    //@JsonManagedReference(value = "estado_product")
     private Estado estado; //new, semiNew, used, old
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn()
-    @JsonBackReference
+    @JsonBackReference(value = "category_product")
+    //@JsonManagedReference(value = "category_product")
     private Categoria categoria;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonBackReference(value = "user_product")
+    //@JsonIgnore
     @Column(nullable = false)
-    @JsonIgnore
-    private Set<Usuario> usuarios;
+    private Set<Usuario> usuarios = new HashSet<Usuario>();
 
     public long getId() {
         return id;
@@ -125,7 +124,7 @@ public class Producto {
         this.imagen = imagen;
     }
 
-    @JsonBackReference(value = "activo_product")
+    //@JsonBackReference(value = "activo_product")
     public ActivoVendido getActivoVendido() {
         return activoVendido;
     }
@@ -134,7 +133,7 @@ public class Producto {
         this.activoVendido = activoVendido;
     }
 
-    @JsonBackReference(value = "estado_product")
+    //@JsonBackReference(value = "estado_product")
     public Estado getEstado() {
         return estado;
     }
@@ -143,7 +142,7 @@ public class Producto {
         this.estado = estado;
     }
 
-    @JsonBackReference(value = "category_product")
+    //@JsonBackReference(value = "category_product")
     public Categoria getCategoria() {
         return categoria;
     }

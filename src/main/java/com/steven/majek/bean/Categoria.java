@@ -1,5 +1,6 @@
 package com.steven.majek.bean;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,14 +11,16 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Entity
 public class Categoria {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(length = 20, nullable = false)
@@ -25,7 +28,9 @@ public class Categoria {
 
     @OneToMany(mappedBy = "categoria",cascade = CascadeType.ALL)
     @Column(nullable = false)
-    private List<Producto> producto = new ArrayList<>();
+    //@JsonBackReference
+    @JsonManagedReference(value = "category_product")
+    private Set<Producto> producto = new HashSet<Producto>();
 
     public long getId() {
         return id;
@@ -43,12 +48,13 @@ public class Categoria {
         this.tipoCategoria = tipoCategoria;
     }
 
-    @JsonManagedReference(value = "category_product")
-    public List<Producto> getProducto() {
+    //@JsonManagedReference(value = "category_product")
+
+    public Set<Producto> getProducto() {
         return producto;
     }
 
-    public void setProducto(List<Producto> producto) {
+    public void setProducto(Set<Producto> producto) {
         this.producto = producto;
     }
 

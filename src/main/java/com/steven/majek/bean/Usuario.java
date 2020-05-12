@@ -15,14 +15,16 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "USUARIO")
 public class Usuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(nullable = false, unique = true, length = 20)
@@ -51,9 +53,9 @@ public class Usuario {
     private Instant created;
 
     @ManyToMany(mappedBy = "usuarios",cascade = CascadeType.ALL)
+    @JsonBackReference()
     @Column(nullable = false)
-    @JsonIgnoreProperties("usuarios")
-    private List<Producto> productos = new ArrayList<>();
+    private Set<Producto> productos = new HashSet<Producto>();
 
     public long getId() {
         return id;
@@ -128,11 +130,11 @@ public class Usuario {
     }
 
     //@JsonBackReference(value = "user_product")
-    public List<Producto> getProductos() {
+    public Set<Producto> getProductos() {
         return productos;
     }
 
-    public void setProductos(List<Producto> productos) {
+    public void setProductos(Set<Producto> productos) {
         this.productos = productos;
     }
 
