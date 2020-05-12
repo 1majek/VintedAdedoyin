@@ -1,0 +1,26 @@
+
+
+
+
+
+
+
+    * * * VINTED ANDRIOD APP * * *
+
+
+
+    // 1. add into product table
+    // 2. show my products on sale = select * from product where status = 'active';
+    // 3. show 10 users with more products on sale = select u.nombre, count(*)  as total from producto_usuario pu, producto p, usuario u where pu.usuario_id = u.id and pu.productos_id = p.id group by u.nombre order by total desc limit 10;
+    // 4. show 10 products with more rating
+    // 5. show product categorized by men, women and kids
+    // 6. search by anything the user types
+    // 7. show in filtered option (4 and 5)
+    // 8. show products description with characteristics
+    // 9. confirm buy
+    // 10. show buy history
+    // 11. rate a product
+    // 12. send an email confirmation to the bought item and description
+    // 13. notification of a bought item
+
+    // products on sale : select * from producto p where p.id not in (select p.id from producto_usuario) order by  p.id;
