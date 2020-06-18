@@ -1,7 +1,5 @@
 package com.steven.majek.bean.resultBean;
 
-import com.steven.majek.bean.Categoria;
-
 public class AllCategorias {
 
     private long idCategoria;

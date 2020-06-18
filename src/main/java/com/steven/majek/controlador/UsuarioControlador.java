@@ -1,16 +1,20 @@
 package com.steven.majek.controlador;
 
-import com.steven.majek.bean.Producto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.steven.majek.bean.Usuario;
+import com.steven.majek.bean.resultBean.TopUsers;
 import com.steven.majek.repo.UsuarioRepo;
-import org.hibernate.collection.internal.PersistentBag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
+import java.awt.print.Pageable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +24,8 @@ public class UsuarioControlador {
     @Autowired
     UsuarioRepo usuarioRepo;
 
+    ObjectMapper objectMapper = new ObjectMapper();
+
 
     @PostMapping(value = "login")
     public String login(@RequestBody Usuario user) {
@@ -27,82 +33,91 @@ public class UsuarioControlador {
         String emailNombreU = user.getEmail();
         String pass = user.getPass();
 
-        ArrayList<Usuario> usuario = usuarioRepo.findByEmailOrNombreUsuarioAndPass(emailNombreU,emailNombreU,pass);
 
-        Usuario toSend = new Usuario();
-        ArrayList<Usuario> listToSend  = new ArrayList();
+        Usuario usuario = usuarioRepo.findByEmailOrNombreUsuarioAndPass(emailNombreU,emailNombreU,pass);
 
-        if (usuario.size()>0) {
+//        objectMapper.findAndRegisterModules();
+//        SimpleDateFormat dataFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+//        objectMapper.setDateFormat(dataFormat);
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        String valor = null;
+        try {
+             valor = objectMapper.writeValueAsString(usuario);
 
-            toSend.setId(usuario.get(0).getId());
-            toSend.setNombreUsuario(usuario.get(0).getNombreUsuario());
-            toSend.setNombre(usuario.get(0).getNombre());
-            toSend.setApellido(usuario.get(0).getApellido());
-            toSend.setEmail(usuario.get(0).getEmail());
-            toSend.setPass(usuario.get(0).getPass());
-            toSend.setDireccion(usuario.get(0).getDireccion());
-            toSend.setUrlFoto(usuario.get(0).getUrlFoto());
-            toSend.setCreated(usuario.get(0).getCreated());
-
-
-            listToSend.add(toSend);
-        }else {
-            toSend = new Usuario();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
         }
-        return Usuario.toArrayJson(listToSend);
+         return valor;
+        //return Usuario.toArrayJson(usuario);
+        //return usuario;
     }
 
-    @PostMapping(value = "testLogin")
-    public String TestLogin(@RequestBody Usuario user) {
-        String emailNombreU = user.getEmail();
-        String pass = user.getPass();
-
-        ArrayList<Usuario> lista =  usuarioRepo.findByEmailOrNombreUsuarioAndPass(emailNombreU,emailNombreU,pass);
-
-        return Usuario.toArrayJson(lista) ;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    @GetMapping("findAll")
-    public List<Usuario> getUsers() {
-        List<Usuario> list = usuarioRepo.findAll();
-
-        return list;
-    }
 
     @PostMapping("registrame")
-    public String registrame(@RequestBody Usuario usuario) {
-        ArrayList<Usuario> lista = new ArrayList();
-        lista.add(usuario);
-        usuario.setCreated(Instant.now());
-        if (usuario.getNombre() != "" || usuario.getEmail()!= "" || usuario.getPass()!="") {
-            usuarioRepo.save(usuario);
+    public String registrame(@RequestBody Usuario usuario) throws JsonProcessingException{
+
+        String valor = null;
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        //comprobar si ya existe
+        List<Usuario> usuarioList = usuarioRepo.findAll();
+
+        boolean check = false;
+
+        for (Usuario user : usuarioList) {
+
+            if ((user.getEmail().equals(usuario.getEmail()) || (user.getNombreUsuario().equals(usuario.getNombreUsuario()) ))) {
+                check = true;
+
+            }
+
         }
 
+        if (check) {
+                //valor = Usuario.toArrayJson(usuario);
+                return objectMapper.writeValueAsString(usuario);
+                //valor = "Ya existe un usuario con "+usuario.getEmail()+" o con el nombre usuario "+usuario.getNombreUsuario();
+               //return valor;
+        }else{
+               Usuario enviar = usuarioRepo.save(usuario);
+               return objectMapper.writeValueAsString(enviar);
 
-        return Usuario.toArrayJson(lista);
+               //return   Usuario.toArrayJson(enviar);
+
+        }
+
+        //return valor;
+
+
+        //return Usuario.toArrayJsonAl(lista);
     }
 
-    @GetMapping("findTop")
-    public ArrayList<Usuario> findTopByProductos() {
+    @GetMapping("topUsers")
+    public String topUsers() {
 
-        return usuarioRepo.findTopByProductosContaining("cama");
+
+        List<TopUsers> lstProducts = usuarioRepo.findUsuarioByTopVentas(PageRequest.of(0,10));
+
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        String valor = null;
+        try {
+            valor = objectMapper.writeValueAsString(lstProducts);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        return valor;
     }
+
+//    @GetMapping("findTop")
+//    public ArrayList<Usuario> findTopByProductos() {
+//
+//        return usuarioRepo.findTopByProductosContaining("cama");
+//    }
 
 
 }

@@ -1,30 +1,24 @@
 package com.steven.majek.bean;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Value;
+import com.google.gson.*;
+import com.steven.majek.LocalDatTimeFormatter.LocalDateTimeAdapterDeserializer;
+import com.steven.majek.LocalDatTimeFormatter.LocalDateTimeAdapterSerializer;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.*;
 
 @Entity
-@Table(name = "USUARIO")
+//@Table(name = "USUARIO")
 public class Usuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
 
     @Column(nullable = false, unique = true, length = 20)
@@ -49,13 +43,45 @@ public class Usuario {
     @Column(nullable = true, length = 100)
     private String urlFoto;
 
-    @NotNull
-    private Instant created;
+    @CreationTimestamp
+    private LocalDateTime created;
+//
+//    @ManyToMany(mappedBy = "usuarios",cascade = {CascadeType.PERSIST, CascadeType.MERGE},fetch = FetchType.LAZY)
+//    @JsonBackReference()
+//    @Column(nullable = false)
+//    private Set<Producto> productos = new HashSet<Producto>();
 
-    @ManyToMany(mappedBy = "usuarios",cascade = CascadeType.ALL)
-    @JsonBackReference()
+    @OneToMany(mappedBy = "compraProducto")
+    @JsonManagedReference(value = "compra_product")
+    @Column(nullable = true)
+    //@JsonSerialize(using = ToStringSerializer.class)
+    private Set<Producto> compraProducto = new HashSet<Producto>();
+
+    @OneToMany(mappedBy = "venderProducto")
+    @JsonManagedReference(value = "vender_product")
     @Column(nullable = false)
-    private Set<Producto> productos = new HashSet<Producto>();
+    //@JsonSerialize(using = ToStringSerializer.class)
+    private Set<Producto>  vendeProducto = new HashSet<>();
+
+
+    public Usuario() {
+    }
+
+    public Usuario(String nombreUsuario,String nombre,String apellido, String email, String pass, String direccion, String urlFoto, LocalDateTime created ) {
+
+        this.nombreUsuario = nombreUsuario;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.email = email;
+        this.pass = pass;
+        this.direccion = direccion;
+        this.urlFoto = urlFoto;
+        this.created = created;
+
+//        for (UsuarioProductos usuarioProducto : usuarioProductos) usuarioProducto.setUsuario(this);
+//        this.usuarioProductos = Stream.of(usuarioProductos).collect(Collectors.toSet());
+    }
+
 
     public long getId() {
         return id;
@@ -121,24 +147,50 @@ public class Usuario {
         urlFoto = urlFoto;
     }
 
-    public Instant getCreated() {
+    //@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    //@JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    public LocalDateTime getCreated() {
         return created;
     }
 
-    public void setCreated(Instant created) {
+    public void setCreated(LocalDateTime created) {
         this.created = created;
     }
 
-    //@JsonBackReference(value = "user_product")
-    public Set<Producto> getProductos() {
-        return productos;
+    public Set<Producto> getVendeProducto() {
+        return vendeProducto;
     }
 
-    public void setProductos(Set<Producto> productos) {
-        this.productos = productos;
+    public void setVendeProducto(Set<Producto> vendeProducto) {
+        this.vendeProducto = vendeProducto;
     }
 
-    public static String toArrayJson(ArrayList<Usuario> usuario) {
+    public Set<Producto> getCompraProducto() {
+        return compraProducto;
+    }
+
+    public void setCompraProducto(Set<Producto> compraProducto) {
+        this.compraProducto = compraProducto;
+    }
+
+    public static String toArrayJson(Usuario usuario) {
+        GsonBuilder builder = new GsonBuilder();
+        builder.setPrettyPrinting();
+
+
+        //Serializar
+        builder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapterSerializer());
+
+        //Deserializer
+        builder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapterDeserializer());
+
+        Gson gson = builder.setPrettyPrinting().create();
+        String resp = gson.toJson(usuario);
+
+        return resp;
+    }
+
+    public static String toArrayJsonAl(ArrayList<Usuario> usuario) {
         GsonBuilder builder = new GsonBuilder();
         builder.setPrettyPrinting();
 
@@ -147,4 +199,15 @@ public class Usuario {
 
         return resp;
     }
+    public static String cadena(String usuario) {
+        GsonBuilder builder = new GsonBuilder();
+        builder.setPrettyPrinting();
+
+        Gson gson = builder.create();
+        String resp = gson.toJson(usuario);
+
+        return resp;
+    }
+
+
 }

@@ -1,18 +1,11 @@
 package com.steven.majek.bean;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.steven.majek.bean.resultBean.AllCategorias;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -20,7 +13,7 @@ import java.util.Set;
 public class Categoria {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
 
     @Column(length = 20, nullable = false)

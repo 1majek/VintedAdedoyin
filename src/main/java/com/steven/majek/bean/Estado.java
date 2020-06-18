@@ -1,15 +1,9 @@
 package com.steven.majek.bean;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -17,14 +11,14 @@ import java.util.Set;
 public class Estado {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
 
     @Column(length = 20, nullable = false)
     private String tipoEstado; //nuevo, semiNuevo y usado
 
     //cascade = CascadeType.ALL
-    @OneToMany(mappedBy = "estado",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "estado")
     @Column(nullable = false)
     //@JsonBackReference
     @JsonManagedReference(value = "estado_product")

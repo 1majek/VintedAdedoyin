@@ -1,45 +1,33 @@
 package com.steven.majek.bean.resultBean;
 
 import com.steven.majek.bean.Producto;
-import com.sun.org.apache.xml.internal.security.Init;
 import org.springframework.data.rest.core.config.Projection;
 
-import java.math.BigInteger;
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Projection(name = "deadline", types = { Producto.class })
 public class AllProducts {
     //select p.id as id_producto, p.created as fecha_producto,p.descripcion as desc_producto,p.imagen as imagen_producto,p.nombre as nombre_producto,p.precio as precio_producto,p.puntos as punto_producto,p.intercambio as intercambio_producto, u.nombre as nombre_usuario,e.tipo_estado as estado,c.tipo_categoria as categoria " +
 
     private long id_producto;
-    private Instant fecha_producto;
+    private LocalDateTime fecha_producto;
     private String  desc_producto;
     private String imagen_producto;
     private String nombre_producto;
     private double precio_producto;
     private double punto_producto;
     private boolean intercambio_producto;
-    private String nombre_usuario;
     private String estado;
     private String categoria;
+    private String nombreUsuarioVenta;
+    private String nombreUsuarioCompra;
+    private String activoVendido;
 
-    public AllProducts(long id_producto, Instant fecha_producto, String desc_producto, String imagen_producto, String nombre_producto, double precio_producto, double punto_producto, boolean intercambio_producto, String nombre_usuario, String estado, String categoria) {
-        this.id_producto = id_producto;
-        this.fecha_producto = fecha_producto;
-        this.desc_producto = desc_producto;
-        this.imagen_producto = imagen_producto;
-        this.nombre_producto = nombre_producto;
-        this.precio_producto = precio_producto;
-        this.punto_producto = punto_producto;
-        this.intercambio_producto = intercambio_producto;
-        this.nombre_usuario = nombre_usuario;
-        this.estado = estado;
-        this.categoria = categoria;
+    public AllProducts() {
+        super();
     }
 
-
-    public AllProducts(long id_producto, Instant fecha_producto, String desc_producto, String imagen_producto, String nombre_producto, double precio_producto, double punto_producto, boolean intercambio_producto, String estado, String categoria) {
+    public AllProducts(long id_producto, LocalDateTime fecha_producto, String desc_producto, String imagen_producto, boolean intercambio_producto, String nombre_producto, double precio_producto, double punto_producto, String categoria, String estado, String nombreUsuarioVenta) {
         this.id_producto = id_producto;
         this.fecha_producto = fecha_producto;
         this.desc_producto = desc_producto;
@@ -50,9 +38,12 @@ public class AllProducts {
         this.intercambio_producto = intercambio_producto;
         this.estado = estado;
         this.categoria = categoria;
+        this.nombreUsuarioVenta = nombreUsuarioVenta;
     }
 
-    public AllProducts(long id_producto, Instant fecha_producto, String desc_producto, String imagen_producto, String nombre_producto, double precio_producto, double punto_producto, boolean intercambio_producto, String nombre_usuario) {
+    //productos vendidos
+
+    public AllProducts(long id_producto, LocalDateTime fecha_producto, String desc_producto, String imagen_producto, boolean intercambio_producto, String nombre_producto, double precio_producto, double punto_producto, String categoria, String estado, String nombreUsuarioVenta,String nombreUsuarioCompra,String activoVendido) {
         this.id_producto = id_producto;
         this.fecha_producto = fecha_producto;
         this.desc_producto = desc_producto;
@@ -61,7 +52,68 @@ public class AllProducts {
         this.precio_producto = precio_producto;
         this.punto_producto = punto_producto;
         this.intercambio_producto = intercambio_producto;
-        this.nombre_usuario = nombre_usuario;
+        this.estado = estado;
+        this.categoria = categoria;
+        this.nombreUsuarioVenta = nombreUsuarioVenta;
+        this.nombreUsuarioCompra = nombreUsuarioCompra;
+        this.activoVendido = activoVendido;
+    }
+// buscar
+    public AllProducts(long id_producto, LocalDateTime fecha_producto, String desc_producto, String imagen_producto, boolean intercambio_producto, String nombre_producto, double precio_producto, double punto_producto, String categoria, String estado, String nombreUsuarioVenta,String activoVendido) {
+        this.id_producto = id_producto;
+        this.fecha_producto = fecha_producto;
+        this.desc_producto = desc_producto;
+        this.imagen_producto = imagen_producto;
+        this.nombre_producto = nombre_producto;
+        this.precio_producto = precio_producto;
+        this.punto_producto = punto_producto;
+        this.intercambio_producto = intercambio_producto;
+        this.estado = estado;
+        this.categoria = categoria;
+        this.nombreUsuarioVenta = nombreUsuarioVenta;
+        this.nombreUsuarioCompra = nombreUsuarioCompra;
+        this.activoVendido = activoVendido;
+    }
+
+
+    public AllProducts(long id_producto, LocalDateTime fecha_producto, String desc_producto, String imagen_producto, String nombre_producto, double precio_producto, double punto_producto, boolean intercambio_producto, String estado, String categoria) {
+        this.id_producto = id_producto;
+        this.fecha_producto = fecha_producto;
+        this.desc_producto = desc_producto;
+        this.imagen_producto = imagen_producto;
+        this.nombre_producto = nombre_producto;
+        this.precio_producto = precio_producto;
+        this.punto_producto = punto_producto;
+        this.intercambio_producto = intercambio_producto;
+        this.estado = estado;
+        this.categoria = categoria;
+    }
+
+    public AllProducts(long id_producto, LocalDateTime fecha_producto, String desc_producto, String imagen_producto, String nombre_producto, double precio_producto, double punto_producto, boolean intercambio_producto, String nombre_usuario) {
+        this.id_producto = id_producto;
+        this.fecha_producto = fecha_producto;
+        this.desc_producto = desc_producto;
+        this.imagen_producto = imagen_producto;
+        this.nombre_producto = nombre_producto;
+        this.precio_producto = precio_producto;
+        this.punto_producto = punto_producto;
+        this.intercambio_producto = intercambio_producto;
+    }
+
+    public String getNombreUsuarioVenta() {
+        return nombreUsuarioVenta;
+    }
+
+    public void setNombreUsuarioVenta(String nombreUsuarioVenta) {
+        this.nombreUsuarioVenta = nombreUsuarioVenta;
+    }
+
+    public String getNombreUsuarioCompra() {
+        return nombreUsuarioCompra;
+    }
+
+    public void setNombreUsuarioCompra(String nombreUsuarioCompra) {
+        this.nombreUsuarioCompra = nombreUsuarioCompra;
     }
 
     public long getId_producto() {
@@ -72,11 +124,11 @@ public class AllProducts {
         this.id_producto = id_producto;
     }
 
-    public Instant getFecha_producto() {
+    public LocalDateTime getFecha_producto() {
         return fecha_producto;
     }
 
-    public void setFecha_producto(Instant fecha_producto) {
+    public void setFecha_producto(LocalDateTime fecha_producto) {
         this.fecha_producto = fecha_producto;
     }
 
@@ -128,12 +180,12 @@ public class AllProducts {
         this.intercambio_producto = intercambio_producto;
     }
 
-    public String getNombre_usuario() {
-        return nombre_usuario;
+    public String getActivoVendido() {
+        return activoVendido;
     }
 
-    public void setNombre_usuario(String nombre_usuario) {
-        this.nombre_usuario = nombre_usuario;
+    public void setActivoVendido(String activoVendido) {
+        this.activoVendido = activoVendido;
     }
 
     public String getEstado() {

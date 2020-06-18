@@ -7,4 +7,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ActivoVendidoRepo extends JpaRepository<ActivoVendido, Long> {
+
+    //getActivoVendidoByForma
+
+//    @Query("SELECT a from ActivoVendido  a where a.forma = 'Activo' ")
+//    public ActivoVendido buscarActivo();
+
+    public ActivoVendido findByForma(String forma);
 }

@@ -2,14 +2,11 @@ package com.steven.majek.bean;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -17,14 +14,14 @@ import java.util.Set;
 public class ActivoVendido {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
 
     @Column(length = 20, nullable = false)
     private String forma; //Activo,vendido,retirado o eliminado
 
     //@JsonBackReference(value = "activo_productss")
-    @OneToMany(mappedBy = "activoVendido",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "activoVendido",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @Column(nullable = false)
     @JsonManagedReference(value = "activo_product")
     private Set<Producto> producto = new HashSet<Producto>();
@@ -52,6 +49,16 @@ public class ActivoVendido {
 
     public void setProducto(Set<Producto> producto) {
         this.producto = producto;
+    }
+
+    public static String toArrayJson(ActivoVendido activoVendido) {
+        GsonBuilder builder = new GsonBuilder();
+        builder.setPrettyPrinting();
+
+        Gson gson = builder.create();
+        String resp = gson.toJson(activoVendido);
+
+        return resp;
     }
 
 }

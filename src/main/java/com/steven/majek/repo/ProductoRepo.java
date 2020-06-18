@@ -1,64 +1,65 @@
 package com.steven.majek.repo;
 
-import com.steven.majek.bean.ActivoVendido;
 import com.steven.majek.bean.Producto;
+import com.steven.majek.bean.Usuario;
 import com.steven.majek.bean.resultBean.AllProducts;
+import com.steven.majek.bean.resultBean.TopRating;
+import com.steven.majek.bean.resultBean.TopUsers;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.ui.Model;
 
-import java.math.BigInteger;
-import java.sql.Timestamp;
+import java.awt.print.Pageable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ProductoRepo extends JpaRepository<Producto, Long> {
-    //@Query(value = "select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.nombre, p.precio,p.puntos,p.intercambio,u.nombre) from Producto p join p.usuarios u")
-    //@Query(value = "select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.nombre, p.precio,p.puntos,p.intercambio,u.nombre,c.tipoCategoria) from Producto p join p.usuarios u left outer join p.activoVendido av left outer join p.categoria c where av.forma='Activo'")
-    //@Query(value = "select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.nombre, p.precio,p.puntos,p.intercambio,u.nombreUsuario,e.tipoEstado,c.tipoCategoria) from Producto p join p.usuarios u left outer join p.estado e left outer join p.categoria c left outer join p.activoVendido av where av.forma ='Activo'")
 
-    //List<Producto> lstProductos
+      @Query("select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.intercambio,p.nombre, p.precio,p.puntos,c.tipoCategoria,e.tipoEstado,u.nombreUsuario) FROM Producto p JOIN Usuario u ON p.venderProducto.id = u.id JOIN Categoria c on p.categoria.id = c.id JOIN Estado e on p.estado.id = e.id JOIN ActivoVendido a on p.activoVendido.id = a.id where a.forma = 'Activo' and u.id <> ?1")
+      public List<AllProducts> articulosEnVenta(Long idUsuario);
 
-    //@Query(value = "select p.id as id, p.nombre,p.descripcion,p.precio,p.puntos,p.imagen from Producto p where p.id = 10")
-//    @Query(value = "from Producto")
-    @Query("select sum (precio) from Producto ")
-    public double total();
+    @Query("select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.intercambio,p.nombre, p.precio,p.puntos,c.tipoCategoria,e.tipoEstado,u.nombreUsuario) FROM Producto p JOIN Usuario u ON p.venderProducto.id = u.id JOIN Categoria c on p.categoria.id = c.id JOIN Estado e on p.estado.id = e.id JOIN ActivoVendido a on p.activoVendido.id = a.id where a.forma = 'Activo' and u.id= ?1")
+    public List<AllProducts> articulosTopUsers(Long idUsuario);
 
-    @Query(value = "select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.nombre, p.precio,p.puntos,p.intercambio,u.nombreUsuario,e.tipoEstado,c.tipoCategoria) from Producto p join p.usuarios u left outer join p.estado e left outer join p.categoria c left outer join p.activoVendido av where av.forma ='Activo'")
-    //@Query("select p from Producto p join p.usuarios u where u.id = 1")
-    public ArrayList<AllProducts> productosEnVenta();
-    //select  p.id, p.created,p.descripcion,p.imagen,p.nombre,p.precio,p.puntos,p.intercambio,e.tipo_estado,c.tipo_categoria  from producto p left outer join activo_vendido av on p.activo_vendido_id = av.id left outer join categoria c on p.categoria_id = c.id
-    //left outer join estado e on p.estado_id = e.id;
+        //@Query(value = "select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.intercambio,p.nombre, p.precio,p.puntos,u.nombreUsuario,c.tipoCategoria,e.tipoEstado) FROM Producto p LEFT OUTER JOIN ActivoVendido a ON p.id = a.id LEFT OUTER JOIN Usuario u on p.id = u.id LEFT OUTER JOIN Categoria c ON p.categoria = c.tipoCategoria LEFT OUTER JOIN Estado e ON p.estado = e.tipoEstado WHERE a.forma = 'Activo' and u.id = ?1")
+        @Query("select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.intercambio,p.nombre, p.precio,p.puntos,c.tipoCategoria,e.tipoEstado,u.nombreUsuario) FROM Producto p JOIN Usuario u ON p.venderProducto.id = u.id JOIN Categoria c on p.categoria.id = c.id JOIN Estado e on p.estado.id = e.id JOIN ActivoVendido a on p.activoVendido.id = a.id where a.forma = 'Activo' and u.id = ?1")
+        public List<AllProducts> misArticulosEnVenta(Long idUsuario);
 
+     @Query("select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.intercambio,p.nombre, p.precio,p.puntos,c.tipoCategoria,e.tipoEstado,u.nombreUsuario) FROM Producto p JOIN Usuario u ON p.venderProducto.id = u.id JOIN Categoria c on p.categoria.id = c.id JOIN Estado e on p.estado.id = e.id JOIN ActivoVendido a on p.activoVendido.id = a.id where p.compraProducto = ?1")
+     public List<AllProducts> misArticulosComprados(Long idUsuario);
 
-   /* private BigInteger id_producto;
-    private Timestamp fecha_producto;
-    private String  desc_producto;
-    private String imagen_producto;
-    private String nombre_producto;
-    private double precio_producto;
-    private double punto_producto;
-    private boolean intercambio_producto;
-    private String nombre_usuario;
-    private String estado;
-    private String categoria;
+        @Query("select NEW com.steven.majek.bean.Producto(p.id,p.nombre,p.descripcion,p.precio,p.puntos,p.categoria,p.created,p.estado,p.imagen,p.intercambio)from Producto p left outer join ActivoVendido a on p.id = a.id left outer join Usuario u on p.id = u.id where u.id<> ?1")
+        public List<Producto> productosPorUserId(Long idUsuario);
 
-    */
+        @Query("select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.intercambio,p.nombre, p.precio,p.puntos,c.tipoCategoria,e.tipoEstado,u.nombreUsuario) FROM Producto p JOIN Usuario u ON p.venderProducto.id = u.id JOIN Categoria c on p.categoria.id = c.id JOIN Estado e on p.estado.id = e.id JOIN ActivoVendido a on p.activoVendido.id = a.id where p.compraProducto.id = ?1")
+        public List<AllProducts> productosComprados(Long idUsuario);
 
-    @Query("select p.nombre,p.descripcion,p.puntos,p.created from Producto p")
-    public ArrayList test();
+    @Query("select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.intercambio,p.nombre, p.precio,p.puntos,c.tipoCategoria,e.tipoEstado,u.nombreUsuario,p.compraProducto.nombreUsuario,a.forma) FROM Producto p JOIN Usuario u ON p.venderProducto.id = u.id JOIN Categoria c on p.categoria.id = c.id JOIN Estado e on p.estado.id = e.id JOIN ActivoVendido a on p.activoVendido.id = a.id where p.venderProducto.id = ?1 and a.forma = 'Vendido'")
+    public List<AllProducts> productosVendidos(Long idUsuario);
 
-    /*@Query("select o.customer.surname, sum(o.amount) as s from Order as o group by o.customer")
+    @Query("select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.intercambio,p.nombre, p.precio,p.puntos,c.tipoCategoria,e.tipoEstado,u.nombreUsuario) FROM Producto p JOIN Usuario u ON p.venderProducto.id = u.id JOIN Categoria c on p.categoria.id = c.id JOIN Estado e on p.estado.id = e.id JOIN ActivoVendido a on p.activoVendido.id = a.id where p.venderProducto.id = ?1 and a.forma = 'Retirado'")
+    public List<AllProducts> productosRetirados(Long idUsuario);
 
-    @Query("select NEW com.mypackage.CustomerAmountResult(
-            o.customer.surname, sum(o.amount))
-    from Order as o
-    group by o.customer.surname")
+    @Query("select NEW com.steven.majek.bean.resultBean.TopRating(p,u.nombreUsuario,u.id,MAX(p.puntos))FROM Producto p join Usuario u on p.venderProducto.id = u.id JOIN Categoria c on p.categoria.id = c.id JOIN Estado e on p.estado.id = e.id JOIN ActivoVendido a on p.activoVendido.id = a.id where p.puntos > 0 group by p.id order by  p.puntos desc ")
+    public List<TopRating> topProductRating(PageRequest pageRequest);
 
-     */
+    @Query("select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.intercambio,p.nombre, p.precio,p.puntos,c.tipoCategoria,e.tipoEstado,u.nombreUsuario,a.forma) FROM Producto p " +
+            "JOIN Usuario u ON p.venderProducto.id = u.id " +
+            "JOIN Categoria c on p.categoria.id = c.id " +
+            "JOIN Estado e on p.estado.id = e.id JOIN ActivoVendido a on p.activoVendido.id = a.id " +
+            "where a.id = 1 and (c.tipoCategoria = :tipoCategoria or e.tipoEstado = :tipoEstado or p.intercambio = :intercambio or p.nombre " +
+            "like %:wildCard% or p.descripcion like %:wildCard% or u.nombreUsuario like %:wildCard% or u.nombre like %:wildCard% or u.apellido like %:wildCard%)")
+    public List<AllProducts>  buscarProductos(@Param("tipoCategoria") String tipoCategoria,@Param("tipoEstado") String tipoEstado, @Param("intercambio") boolean intercambio, @Param("wildCard") String wildCard);
 
+    @Query("select NEW com.steven.majek.bean.resultBean.AllProducts(p.id,p.created,p.descripcion,p.imagen,p.intercambio,p.nombre, p.precio,p.puntos,c.tipoCategoria,e.tipoEstado,u.nombreUsuario,a.forma) FROM Producto p " +
+            "JOIN Usuario u ON p.venderProducto.id = u.id " +
+            "JOIN Categoria c on p.categoria.id = c.id " +
+            "JOIN Estado e on p.estado.id = e.id JOIN ActivoVendido a on p.activoVendido.id = a.id " +
+            "where a.id = 1 and (c.tipoCategoria = :tipoCategoria or e.tipoEstado = :tipoEstado or p.nombre " +
+            "like %:wildCard% or p.descripcion like %:wildCard% or u.nombreUsuario like %:wildCard% or u.nombre like %:wildCard% or u.apellido like %:wildCard%)")
+    public List<AllProducts>  buscarProductosFalse(@Param("tipoCategoria") String tipoCategoria,@Param("tipoEstado") String tipoEstado, @Param("wildCard") String wildCard);
 
 }

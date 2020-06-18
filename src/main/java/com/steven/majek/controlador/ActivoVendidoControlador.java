@@ -1,7 +1,18 @@
 package com.steven.majek.controlador;
 
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 public class ActivoVendidoControlador {
+
+//    @Autowired
+//    ActivoVendidoRepo activoVendidoRepo;
+//
+//    @GetMapping(value = "getForma",produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+//    ActivoVendido getForma() {
+//        ActivoVendido activoVendido = activoVendidoRepo.buscarActivo();
+//
+//        return activoVendido;
+//
+//    }
 }

@@ -1,29 +1,32 @@
 package com.steven.majek.bean;
 
 import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.steven.majek.bean.resultBean.AllProducts;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.steven.majek.utils.GraphAdapterBuilder;
+import com.steven.majek.utils.HibernateProxyTypeAdapter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.proxy.HibernateProxy;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Entity
-@SqlResultSetMapping(name = "p")
-
 public class Producto {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
 
     @Column(nullable = false,length = 30)
@@ -41,32 +44,70 @@ public class Producto {
     @Column(nullable = true)
     private boolean intercambio;
 
-    @NotNull
-    private Instant created;
+    @CreationTimestamp
+    private LocalDateTime created;
 
     @Column(nullable = true,length = 100)
     private String imagen;
 
-    @ManyToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference(value = "activo_product")
     //@JsonManagedReference(value = "activo_product")
     private ActivoVendido activoVendido; //active, sold, redraw, reserved
 
-    @ManyToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference(value = "estado_product")
     //@JsonManagedReference(value = "estado_product")
     private Estado estado; //new, semiNew, used, old
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference(value = "category_product")
     //@JsonManagedReference(value = "category_product")
     private Categoria categoria;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonBackReference(value = "user_product")
-    //@JsonIgnore
-    @Column(nullable = false)
-    private Set<Usuario> usuarios = new HashSet<Usuario>();
+    //@Transient
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference(value = "compra_product")
+    //@JsonSerialize(using = ToStringSerializer.class)
+    private Usuario compraProducto;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference(value = "vender_product")
+    //@JsonManagedReference(value = "category_product")
+    //@JsonSerialize(using = ToStringSerializer.class)
+    private Usuario venderProducto;
+
+    public Producto() {
+    }
+
+    public Producto(Long id, String nombre, String descripcion, double precio, double puntos, Categoria categoria,LocalDateTime created, Estado estado, String imagen, boolean intercambio) {
+        this.id = id;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.puntos = puntos;
+        this.categoria = categoria;
+        this.created = created;
+        this.estado = estado;
+        this.imagen = imagen;
+        this.intercambio = intercambio;
+    }
+
+    public Producto(String nombre, String descripcion, double precio, double puntos, boolean intercambio, LocalDateTime created, String imagen, ActivoVendido activoVendido, Estado estado, Categoria categoria) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.puntos = puntos;
+        this.intercambio = intercambio;
+        this.created = created;
+        this.imagen = imagen;
+        this.activoVendido = activoVendido;
+        this.estado = estado;
+        this.categoria = categoria;
+
+    }
+
+
 
     public long getId() {
         return id;
@@ -108,11 +149,12 @@ public class Producto {
         this.puntos = puntos;
     }
 
-    public Instant getCreated() {
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    public LocalDateTime getCreated() {
         return created;
     }
 
-    public void setCreated(Instant created) {
+    public void setCreated(LocalDateTime created) {
         this.created = created;
     }
 
@@ -151,14 +193,6 @@ public class Producto {
         this.categoria = categoria;
     }
 
-    //@JsonManagedReference(value = "user_product")
-    public Set<Usuario> getUsuario() {
-        return usuarios;
-    }
-
-    public void setUsuario(Set<Usuario> usuario) {
-        this.usuarios = usuario;
-    }
 
     public boolean isIntercambio() {
         return intercambio;
@@ -168,9 +202,25 @@ public class Producto {
         this.intercambio = intercambio;
     }
 
-    public static String toArrayJson(ArrayList<AllProducts> producto) {
+    public Usuario getCompraProducto() {
+        return compraProducto;
+    }
+
+    public void setCompraProducto(Usuario compraProducto) {
+        this.compraProducto = compraProducto;
+    }
+
+    public Usuario getVenderProducto() {
+        return venderProducto;
+    }
+
+    public void setVenderProducto(Usuario venderProducto) {
+        this.venderProducto = venderProducto;
+    }
+
+    public static String toArrayJson(List<AllProducts> producto) {
         GsonBuilder builder = new GsonBuilder();
-        builder.setPrettyPrinting();
+        builder.setPrettyPrinting().registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
 
         Gson gson = builder.create();
         String resp = gson.toJson(producto);
@@ -178,18 +228,25 @@ public class Producto {
         return resp;
     }
 
+    public static Gson testJson(List<Producto> usuarioProductos) {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        new GraphAdapterBuilder().addType(Producto.class).registerOn(gsonBuilder);
+        Gson gson = gsonBuilder.create();
+        return gson;
+    }
 
-    // 1. add into product table
-    // 2. show my products on sale
-    // 3. show 10 users with more products on sale
-    // 4. show 10 products with more rating
-    // 5. show product categorized by men, women and kids
-    // 6. search by anything the user types
-    // 7. show in filtered option (4 and 5)
-    // 8. show products description with characteristics
-    // 9. confirm buy
-    // 10. show buy history
-    // 11. rate a product
-    // 12. send an email confirmation to the bought item and description
-    // 13. notification of a bought item
+
+    // 1. add into product table x
+    // 2. show my products on sale x
+    // 3. show 10 users with more products on sale x
+    // 4. show 10 products with more rating x
+    // 5. show product categorized by men, women and kids x
+    // 6. search by anything the user types x
+    // 7. show in filtered option (4 and 5) x
+    // 8. show products description with characteristics x
+    // 9. confirm buy x
+    // 10. show buy history x
+    // 11. rate a product x
+    // 12. send an email confirmation to the bought item and description 
+    // 13. notification of a bought item x
 }
